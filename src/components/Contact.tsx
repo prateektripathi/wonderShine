@@ -79,7 +79,7 @@ const Contact = () => {
     {
       icon: <Phone className="w-6 h-6" />,
       title: "Call Us",
-      details: ["+91 63940 08997", "+91 98765 43211"],
+      details: ["+91 63940 08997", ],
       action: "Call Now",
       href: "tel:+916394008997",
     },
