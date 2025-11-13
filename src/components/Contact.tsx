@@ -339,7 +339,8 @@ const Contact = () => {
   const [error, setError] = useState<string | null>(null);
 
 // ✅ Your deployed Google Apps Script URL
-  const scriptURL = "https://script.google.com/macros/s/AKfycbynqMBtf4L8gkbJQgX1gckQt4_rtGOprnBT0A0HQws1Hkxts4E4RJ7WYP0KXCf5T8Yd/exec"
+  const scriptURL = "https://script.google.com/macros/s/AKfycbygOKkp4jtWsoX2C9VQ2w9cIPbx4ZgfC61mXZOXQSJ3aVUBCIqZsVEZq7GjurFob1eh/exec";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
