@@ -314,16 +314,11 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
-  Phone,
-  Mail,
-  MapPin,
-  Clock,
   Send,
   MessageSquare,
   Calendar,
   CheckCircle,
 } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -338,69 +333,73 @@ const Contact = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-// ✅ Your deployed Google Apps Script URL
-  const scriptURL = "https://script.google.com/macros/s/AKfycbygOKkp4jtWsoX2C9VQ2w9cIPbx4ZgfC61mXZOXQSJ3aVUBCIqZsVEZq7GjurFob1eh/exec";
+  // Your Google Apps Script Web App URL
+  const scriptURL =
+    "https://script.google.com/macros/s/AKfycbygOKkp4jtWsoX2C9VQ2w9cIPbx4ZgfC61mXZOXQSJ3aVUBCIqZsVEZq7GjurFob1eh/exec";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    // Simple form validation
     if (!formData.name || !formData.email || !formData.service) {
       setError("Please fill all required fields.");
       return;
     }
 
     const newEntry = {
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      service: formData.service,
-      message: formData.message,
+      ...formData,
     };
 
     try {
       setIsLoading(true);
-      const response = await fetch(scriptURL, {
+
+      // IMPORTANT: Use no-cors so Google Script accepts POST
+      await fetch(scriptURL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(newEntry),
       });
 
-      const result = await response.json();
+      // We cannot read response with no-cors → assume success
+      setIsSubmitted(true);
 
-      if (response.ok && result.result === "success") {
-        setIsSubmitted(true);
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          service: "",
-          message: "",
-        });
-        setTimeout(() => setIsSubmitted(false), 3000);
-      } else {
-        setError("Submission failed. Please try again later.");
-      }
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        service: "",
+        message: "",
+      });
+
+      setTimeout(() => setIsSubmitted(false), 3000);
     } catch (error) {
       console.error("Error submitting form:", error);
-      setError("Something went wrong. Check your connection or Google Sheet setup.");
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const whatsappLink =
-    "https://wa.me/916394008997?text=Hi%2C%20I%20want%20to%20book%20a%20car%20wash%20or%20bike%20wash%20service";
+  const slideFromBottom = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+  };
 
-  const slideFromBottom = { hidden: { opacity: 0, y: 50 }, visible: { opacity: 1, y: 0 } };
-  const slideFromLeft = { hidden: { opacity: 0, x: -100 }, visible: { opacity: 1, x: 0 } };
+  const slideFromLeft = {
+    hidden: { opacity: 0, x: -100 },
+    visible: { opacity: 1, x: 0 },
+  };
 
   return (
     <section id="contact" className="py-20 bg-gray-50 overflow-x-hidden">
@@ -417,11 +416,12 @@ const Contact = () => {
             <MessageSquare className="w-4 h-4" />
             <span className="font-semibold">Get In Touch</span>
           </div>
+
           <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
             Ready to Get Started?
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Contact us today for a free quote or to schedule your service. We're here to answer all your questions.
+            Contact us today for a free quote or to schedule your service.
           </p>
         </motion.div>
 
@@ -444,7 +444,7 @@ const Contact = () => {
                 <CheckCircle className="w-8 h-8 text-white" />
               </div>
               <h4 className="text-xl font-bold text-gray-800 mb-2">Thank You!</h4>
-              <p className="text-gray-600">We'll get back to you within 24 hours.</p>
+              <p className="text-gray-600">We’ll get back to you soon.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -456,25 +456,30 @@ const Contact = () => {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Full Name *</label>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Full Name *
+                  </label>
                   <input
                     type="text"
                     name="name"
-                    required
                     value={formData.name}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg"
                     placeholder="Enter your full name"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Email Address *</label>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Email Address *
+                  </label>
                   <input
                     type="email"
                     name="email"
-                    required
                     value={formData.email}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg"
                     placeholder="Enter your email"
                   />
@@ -483,7 +488,9 @@ const Contact = () => {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Phone Number</label>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Phone Number
+                  </label>
                   <input
                     type="tel"
                     name="phone"
@@ -493,8 +500,11 @@ const Contact = () => {
                     placeholder="Enter your phone number"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Service Type *</label>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Service Type *
+                  </label>
                   <select
                     name="service"
                     required
@@ -503,16 +513,26 @@ const Contact = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg"
                   >
                     <option value="">Select a service</option>
-                    <option value="marvel-wash">💧 Marvel Wash – Quick Clean & Refresh</option>
-                    <option value="magic-wash">✨ Magic Wash – Interior–Exterior Revival</option>
-                    <option value="aura-wash">🌟 Aura Wash – Luxury Deep Detailing</option>
-                    <option value="bike-addon">🏍 Bike/Scooter Add-On – Quick Combo Wash Car + Bike</option>
+                    <option value="marvel-wash">
+                      💧 Marvel Wash – Quick Clean & Refresh
+                    </option>
+                    <option value="magic-wash">
+                      ✨ Magic Wash – Interior–Exterior Revival
+                    </option>
+                    <option value="aura-wash">
+                      🌟 Aura Wash – Luxury Deep Detailing
+                    </option>
+                    <option value="bike-addon">
+                      🏍 Bike/Scooter Add-On – Quick Combo Wash Car + Bike
+                    </option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Message</label>
+                <label className="block text-gray-700 font-medium mb-2">
+                  Message
+                </label>
                 <textarea
                   name="message"
                   rows={4}
